@@ -1,0 +1,41 @@
+version: "3.3"
+services:
+  app:
+    build: .
+    volumes:
+      - .:/django
+    ports:
+      - 8001:8001
+    image: app:django
+    depends_on:
+      - 'postgres'
+    container_name: banking_loan_system
+    command: python manage.py runserver 0.0.0.0:8001
+
+  hasura:
+    image: hasura/graphql-engine:latest.cli-migrations-v2
+    volumes:
+      - ./hasura/migrations:/hasura-migrations
+      - ./hasura/metadata:/hasura-metadata
+    container_name: hasura
+    restart: always
+    depends_on:
+      - 'postgres'
+      - 'app'
+    environment:
+      HASURA_GRAPHQL_ENABLE_CONSOLE: 'true'
+      HASURA_GRAPHQL_DEV_MODE: 'true'
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: 'public'
+      HASURA_GRAPHQL_ADMIN_SECRET: 'postgres'
+      HASURA_GRAPHQL_JWT_SECRET: '{ "type": "HS256", "key": "z1q54r85j0%@3=ntf7nm+-)kx#*ln32@_nh7cqpec#n721r0hl" }'
+      HASURA_GRAPHQL_DATABASE_URL: 'postgres://postgres:password@postgres:5432/django_hasura'
+    ports:
+      - "127.0.0.1:8080:8080"
+  postgres:
+    image: postgres:12
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_DB: 'django_hasura'
+      POSTGRES_PASSWORD: 'postgres'
