@@ -1,5 +1,5 @@
-# Treyd_Project
-Banking and loans System
+# 
+# Banking and loans System
 
 # Banking and loan system with graphql and Docker 
 
